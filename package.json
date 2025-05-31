@@ -4,7 +4,7 @@
   "description": "MCP server for OpenAI GPT image generation and editing",
   "main": "dist/index.js",
   "bin": {
-    "openai-gpt-image-mcp": "./dist/cli.js"
+    "openai-gpt-image-mcp": "./dist/index.js"
   },
   "files": [
     "dist/**/*",

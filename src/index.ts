@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // Suppress all Node.js warnings (including deprecation)
 (process as any).emitWarning = () => { };
 
