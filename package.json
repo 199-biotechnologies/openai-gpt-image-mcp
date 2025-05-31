@@ -1,17 +1,47 @@
 {
-  "name": "openai-gpt-image-mcp",
+  "name": "@199-biotechnologies/openai-gpt-image-mcp",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "MCP server for OpenAI GPT image generation and editing",
+  "main": "dist/index.js",
+  "bin": {
+    "openai-gpt-image-mcp": "./dist/cli.js"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "mcp",
+    "openai",
+    "gpt",
+    "image",
+    "generation",
+    "ai"
+  ],
+  "author": "199 Bio Technologies",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/199-biotechnologies/openai-gpt-image-mcp.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "devDependencies": {
     "@types/node": "^22.15.2",
     "typescript": "^5.8.3"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.10.2",
-    "openai": "^4.96.0"
+    "openai": "^4.96.0",
+    "zod": "^3.23.8"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   }
 }

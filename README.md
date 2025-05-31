@@ -1,11 +1,11 @@
 # openai-gpt-image-mcp
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/@199-biotechnologies/openai-gpt-image-mcp"><img src="https://img.shields.io/npm/v/@199-biotechnologies/openai-gpt-image-mcp?label=npm&color=blue" alt="NPM version"></a>
   <a href="https://www.npmjs.com/package/@modelcontextprotocol/sdk"><img src="https://img.shields.io/npm/v/@modelcontextprotocol/sdk?label=MCP%20SDK&color=blue" alt="MCP SDK"></a>
   <a href="https://www.npmjs.com/package/openai"><img src="https://img.shields.io/npm/v/openai?label=OpenAI%20SDK&color=blueviolet" alt="OpenAI SDK"></a>
-  <a href="https://github.com/SureScaleAI/openai-gpt-image-mcp/blob/main/LICENSE"><img src="https://img.shields.io/github/license/SureScaleAI/openai-gpt-image-mcp?color=brightgreen" alt="License"></a>
-  <a href="https://github.com/SureScaleAI/openai-gpt-image-mcp/stargazers"><img src="https://img.shields.io/github/stars/SureScaleAI/openai-gpt-image-mcp?style=social" alt="GitHub stars"></a>
-  <a href="https://github.com/SureScaleAI/openai-gpt-image-mcp/actions"><img src="https://img.shields.io/github/actions/workflow/status/SureScaleAI/openai-gpt-image-mcp/main.yml?label=build&logo=github" alt="Build Status"></a>
+  <a href="https://github.com/199-biotechnologies/openai-gpt-image-mcp/blob/main/LICENSE"><img src="https://img.shields.io/github/license/199-biotechnologies/openai-gpt-image-mcp?color=brightgreen" alt="License"></a>
+  <a href="https://github.com/199-biotechnologies/openai-gpt-image-mcp/stargazers"><img src="https://img.shields.io/github/stars/199-biotechnologies/openai-gpt-image-mcp?style=social" alt="GitHub stars"></a>
 </p>
 
 ---
@@ -28,8 +28,34 @@ A Model Context Protocol (MCP) tool server for OpenAI's GPT-4o/gpt-image-1 image
 
 ## 🚀 Installation
 
+### Quick Setup with NPX (Recommended)
+
+No installation needed! Use directly with npx:
+
+```json
+{
+  "mcpServers": {
+    "openai-gpt-image": {
+      "command": "npx",
+      "args": ["@199-biotechnologies/openai-gpt-image-mcp"],
+      "env": { 
+        "OPENAI_API_KEY": "sk-..." 
+      }
+    }
+  }
+}
+```
+
+### Manual Installation
+
 ```sh
-git clone https://github.com/SureScaleAI/openai-gpt-image-mcp.git
+npm install -g @199-biotechnologies/openai-gpt-image-mcp
+```
+
+Or build from source:
+
+```sh
+git clone https://github.com/199-biotechnologies/openai-gpt-image-mcp.git
 cd openai-gpt-image-mcp
 yarn install
 yarn build
@@ -39,19 +65,13 @@ yarn build
 
 ## 🔑 Configuration
 
-Add to Claude Desktop or VSCode (including Cursor/Windsurf) config:
+The configuration shown above in the Quick Setup section works for all MCP-compatible clients:
+- Claude Desktop
+- VSCode
+- Cursor
+- Windsurf
 
-```json
-{
-  "mcpServers": {
-    "openai-gpt-image-mcp": {
-      "command": "node",
-      "args": ["/absolute/path/to/dist/index.js"],
-      "env": { "OPENAI_API_KEY": "sk-..." }
-    }
-  }
-}
-```
+Just add the configuration to your MCP client's config file with your OpenAI API key.
 
 ---
 
