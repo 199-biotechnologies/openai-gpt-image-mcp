@@ -1,7 +1,7 @@
 # openai-gpt-image-mcp
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@199-biotechnologies/openai-gpt-image-mcp"><img src="https://img.shields.io/npm/v/@199-biotechnologies/openai-gpt-image-mcp?label=npm&color=blue" alt="NPM version"></a>
+  <a href="https://www.npmjs.com/package/openai-gpt-image-mcp-199bio"><img src="https://img.shields.io/npm/v/openai-gpt-image-mcp-199bio?label=npm&color=blue" alt="NPM version"></a>
   <a href="https://www.npmjs.com/package/@modelcontextprotocol/sdk"><img src="https://img.shields.io/npm/v/@modelcontextprotocol/sdk?label=MCP%20SDK&color=blue" alt="MCP SDK"></a>
   <a href="https://www.npmjs.com/package/openai"><img src="https://img.shields.io/npm/v/openai?label=OpenAI%20SDK&color=blueviolet" alt="OpenAI SDK"></a>
   <a href="https://github.com/199-biotechnologies/openai-gpt-image-mcp/blob/main/LICENSE"><img src="https://img.shields.io/github/license/199-biotechnologies/openai-gpt-image-mcp?color=brightgreen" alt="License"></a>
@@ -37,7 +37,7 @@ No installation needed! Use directly with npx:
   "mcpServers": {
     "openai-gpt-image": {
       "command": "npx",
-      "args": ["@199-biotechnologies/openai-gpt-image-mcp"],
+      "args": ["openai-gpt-image-mcp-199bio"],
       "env": { 
         "OPENAI_API_KEY": "sk-..." 
       }
@@ -49,7 +49,7 @@ No installation needed! Use directly with npx:
 ### Manual Installation
 
 ```sh
-npm install -g @199-biotechnologies/openai-gpt-image-mcp
+npm install -g openai-gpt-image-mcp-199bio
 ```
 
 Or build from source:
