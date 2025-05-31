@@ -1,6 +1,6 @@
 {
   "name": "openai-gpt-image-mcp-199bio",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for OpenAI GPT image generation and editing",
   "main": "dist/index.js",
   "bin": {
