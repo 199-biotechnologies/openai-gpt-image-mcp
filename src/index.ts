@@ -20,6 +20,37 @@ import path from "path";
     }
   });
 
+  // Aspect ratio mapping for common ratios
+  const aspectRatioMap: Record<string, string> = {
+    "1:1": "1024x1024",
+    "square": "1024x1024",
+    "16:9": "1536x1024",
+    "landscape": "1536x1024",
+    "9:16": "1024x1536",
+    "portrait": "1024x1536",
+    "3:2": "1536x1024",
+    "2:3": "1024x1536",
+    "4:3": "1024x1024", // closest to square
+    "3:4": "1024x1024", // closest to square
+  };
+
+  // Helper function to parse size input
+  const parseSize = (input: string): string => {
+    // If it's already a valid size, return it
+    if (["1024x1024", "1536x1024", "1024x1536", "auto"].includes(input)) {
+      return input;
+    }
+    
+    // Check if it's an aspect ratio we can map
+    const normalizedInput = input.toLowerCase().replace(/\s+/g, "");
+    if (aspectRatioMap[normalizedInput]) {
+      return aspectRatioMap[normalizedInput];
+    }
+    
+    // Return the original input to let validation handle it
+    return input;
+  };
+
   // Zod schema for create-image tool input
   const createImageSchema = z.object({
     prompt: z.string().max(32000),
@@ -30,7 +61,7 @@ import path from "path";
     output_compression: z.number().int().min(0).max(100).optional(),
     output_format: z.enum(["png", "jpeg", "webp"]).optional(),
     quality: z.enum(["auto", "high", "medium", "low"]).optional(),
-    size: z.enum(["1024x1024", "1536x1024", "1024x1536", "auto"]).optional(),
+    size: z.enum(["1024x1024", "1536x1024", "1024x1536", "auto"]).optional().describe("Size of the generated images. Supports exact dimensions (1024x1024, 1536x1024, 1024x1536) or common aspect ratios (1:1, 16:9, 9:16, square, landscape, portrait, 3:2, 2:3, 4:3, 3:4) or 'auto'."),
     user: z.string().optional(),
     output: z.enum(["base64", "file_output"]).default("base64"),
     file_output: z.string().optional().refine(
@@ -73,12 +104,23 @@ import path from "path";
         output_compression,
         output_format,
         quality,
-        size,
+        size: sizeRaw,
         user,
         output = "base64",
         file_output: file_outputRaw,
       } = args;
       const file_output: string | undefined = file_outputRaw;
+      
+      // Parse size input to handle aspect ratios
+      const size = sizeRaw ? parseSize(sizeRaw) : sizeRaw;
+      
+      // Validate parsed size
+      if (size && !["1024x1024", "1536x1024", "1024x1536", "auto"].includes(size)) {
+        throw new Error(
+          `Invalid size '${sizeRaw}'. Supported sizes: 1024x1024, 1536x1024, 1024x1536, auto. ` +
+          `Also accepts aspect ratios: 1:1, 16:9, 9:16, square, landscape, portrait, 3:2, 2:3, 4:3, 3:4.`
+        );
+      }
 
       // Enforce: if background is 'transparent', output_format must be 'png' or 'webp'
       if (background === "transparent" && output_format && !["png", "webp"].includes(output_format)) {
@@ -186,7 +228,7 @@ import path from "path";
     model: z.literal("gpt-image-1").default("gpt-image-1"),
     n: z.number().int().min(1).max(10).optional().describe("Number of images to generate (1-10)."),
     quality: z.enum(["auto", "high", "medium", "low"]).optional().describe("Quality (high, medium, low) - only for gpt-image-1."),
-    size: z.enum(["1024x1024", "1536x1024", "1024x1536", "auto"]).optional().describe("Size of the generated images."),
+    size: z.enum(["1024x1024", "1536x1024", "1024x1536", "auto"]).optional().describe("Size of the generated images. Supports exact dimensions (1024x1024, 1536x1024, 1024x1536) or common aspect ratios (1:1, 16:9, 9:16, square, landscape, portrait, 3:2, 2:3, 4:3, 3:4) or 'auto'."),
     user: z.string().optional().describe("Optional user identifier for OpenAI monitoring."),
     output: z.enum(["base64", "file_output"]).default("base64").describe("Output format: base64 or file path."),
     file_output: z.string().refine(absolutePathCheck, { message: "Path must be absolute" }).optional()
@@ -227,12 +269,23 @@ import path from "path";
         model = "gpt-image-1",
         n,
         quality,
-        size,
+        size: sizeRaw,
         user,
         output = "base64",
         file_output: file_outputRaw,
       } = validatedArgs; // <-- Use validatedArgs here
       const file_output: string | undefined = file_outputRaw;
+      
+      // Parse size input to handle aspect ratios
+      const size = sizeRaw ? parseSize(sizeRaw) : sizeRaw;
+      
+      // Validate parsed size
+      if (size && !["1024x1024", "1536x1024", "1024x1536", "auto"].includes(size)) {
+        throw new Error(
+          `Invalid size '${sizeRaw}'. Supported sizes: 1024x1024, 1536x1024, 1024x1536, auto. ` +
+          `Also accepts aspect ratios: 1:1, 16:9, 9:16, square, landscape, portrait, 3:2, 2:3, 4:3, 3:4.`
+        );
+      }
 
       // Helper to convert input (path or base64) to toFile
       async function inputToFile(input: string, idx = 0) {

@@ -22,6 +22,7 @@ A Model Context Protocol (MCP) tool server for OpenAI's GPT-4o/gpt-image-1 image
 
 - **create-image**: Generate images from a prompt, with advanced options (size, quality, background, etc).
 - **edit-image**: Edit or extend images using a prompt and optional mask, supporting both file paths and base64 input.
+- **Aspect Ratio Support**: Use common aspect ratios like 16:9, 9:16, 1:1, landscape, portrait, etc., which automatically map to supported sizes.
 - **File output**: Save generated images directly to disk, or receive as base64.
 
 ---
@@ -76,6 +77,19 @@ Just add the configuration to your MCP client's config file with your OpenAI API
 ---
 
 ## ⚡ Advanced
+
+### Aspect Ratio Support
+
+The tools now support common aspect ratios that automatically map to OpenAI's supported sizes:
+
+- **Square**: `1:1`, `square`, `4:3`, `3:4` → 1024x1024
+- **Landscape**: `16:9`, `landscape`, `3:2` → 1536x1024  
+- **Portrait**: `9:16`, `portrait`, `2:3` → 1024x1536
+- **Auto**: `auto` → Let OpenAI choose the best size
+
+Example: Instead of specifying `size: "1536x1024"`, you can use `size: "16:9"` or `size: "landscape"`.
+
+### Other Options
 
 - For `create-image`, set `n` to generate up to 10 images at once.
 - For `edit-image`, provide a mask image (file path or base64) to control where edits are applied.
