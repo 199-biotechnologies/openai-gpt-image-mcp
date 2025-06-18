@@ -24,6 +24,7 @@ A Model Context Protocol (MCP) tool server for OpenAI's GPT-4o/gpt-image-1 image
 - **edit-image**: Edit or extend images using a prompt and optional mask, supporting both file paths and base64 input.
 - **Aspect Ratio Support**: Use common aspect ratios like 16:9, 9:16, 1:1, landscape, portrait, etc., which automatically map to supported sizes.
 - **File output**: Save generated images directly to disk, or receive as base64.
+- **AI-Generated Filenames**: The AI can provide descriptive filenames like "cat-playing-football.jpg" based on the image content.
 
 ---
 
@@ -127,9 +128,16 @@ MIT
 
 - **1MB Payload Limit:** MCP clients (including Claude Desktop) have a hard 1MB limit for tool responses. Large images (especially high-res or multiple images) can easily exceed this limit if returned as base64.
 - **Auto-Switch to File Output:** If the total image size exceeds 1MB, the tool will automatically save images to disk and return the file path(s) instead of base64. This ensures compatibility and prevents errors like `result exceeds maximum length of 1048576`.
-- **Default File Location:** If you do not specify a `file_output` path, images will be saved to `/tmp` (or the directory set by the `MCP_HF_WORK_DIR` environment variable) with a unique filename.
+- **Default File Location:** 
+  - **macOS/Linux**: Images are saved to `~/Pictures/gpt-image/` by default
+  - **Fallback**: If the default directory cannot be created, images will be saved to `/tmp` (or the directory set by the `MCP_HF_WORK_DIR` environment variable)
+  - **Custom Path**: You can always specify a custom `file_output` path to override the default
+- **AI-Generated Filenames**: 
+  - The AI can provide descriptive filenames through the `filename` parameter (e.g., "cat-playing-football", "sunset-over-mountains")
+  - Filenames are automatically sanitized to prevent security issues
+  - If multiple images are generated, an index is appended (e.g., "cat-playing-football_1.jpg", "cat-playing-football_2.jpg")
 - **Environment Variable:**
-  - `MCP_HF_WORK_DIR`: Set this to control where large images and file outputs are saved. Example: `export MCP_HF_WORK_DIR=/your/desired/dir`
+  - `MCP_HF_WORK_DIR`: Set this to control the fallback directory for large images and file outputs. Example: `export MCP_HF_WORK_DIR=/your/desired/dir`
 - **Best Practice:** For large or production images, always use file output and ensure your client is configured to handle file paths.
 
 ---

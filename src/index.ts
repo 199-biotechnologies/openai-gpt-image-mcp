@@ -9,6 +9,7 @@ import { z } from "zod";
 import { OpenAI, toFile } from "openai";
 import fs from "fs";
 import path from "path";
+import os from "os";
 
 (async () => {
   const server = new McpServer({
@@ -19,6 +20,47 @@ import path from "path";
       tools: { listChanged: false }
     }
   });
+
+  // Helper function to get default output directory
+  const getDefaultOutputDir = async (): Promise<string> => {
+    const homeDir = os.homedir();
+    const defaultDir = path.join(homeDir, "Pictures", "gpt-image");
+    
+    // Ensure the directory exists
+    try {
+      await fs.promises.mkdir(defaultDir, { recursive: true });
+    } catch (error) {
+      console.error("Failed to create default directory:", error);
+      // Fallback to /tmp if we can't create the default directory
+      return process.env.MCP_HF_WORK_DIR || "/tmp";
+    }
+    
+    return defaultDir;
+  };
+
+  // Helper function to sanitize filenames
+  const sanitizeFilename = (filename: string): string => {
+    // Remove any path separators to prevent directory traversal
+    let sanitized = filename.replace(/[\/\\]/g, '-');
+    
+    // Remove other potentially problematic characters
+    sanitized = sanitized.replace(/[<>:"|?*\x00-\x1f]/g, '-');
+    
+    // Remove leading/trailing dots and spaces
+    sanitized = sanitized.replace(/^[\s.]+|[\s.]+$/g, '');
+    
+    // Limit length to 200 characters (leaving room for extensions and indexes)
+    if (sanitized.length > 200) {
+      sanitized = sanitized.substring(0, 200);
+    }
+    
+    // If the filename is empty after sanitization, use a default
+    if (!sanitized) {
+      sanitized = 'image';
+    }
+    
+    return sanitized;
+  };
 
   // Aspect ratio mapping for common ratios
   const aspectRatioMap: Record<string, string> = {
@@ -75,6 +117,7 @@ import path from "path";
       },
       { message: "file_output must be an absolute path" }
     ).describe("Absolute path to save the image file, including the desired file extension (e.g., /path/to/image.png). If multiple images are generated (n > 1), an index will be appended (e.g., /path/to/image_1.png)."),
+    filename: z.string().optional().describe("Optional descriptive filename (without extension) for saving the image. Example: 'cat-playing-football'. The AI should provide a descriptive name based on the prompt. If not provided, a timestamp will be used."),
   }).refine(
     (data) => {
       if (data.output !== "file_output") return true;
@@ -108,6 +151,7 @@ import path from "path";
         user,
         output = "base64",
         file_output: file_outputRaw,
+        filename,
       } = args;
       const file_output: string | undefined = file_outputRaw;
       
@@ -164,16 +208,24 @@ import path from "path";
       if (output === "base64" && totalBase64Size > MAX_RESPONSE_SIZE) {
         effectiveOutput = "file_output";
         if (!file_output) {
-          // Use /tmp or MCP_HF_WORK_DIR if set
-          const tmpDir = process.env.MCP_HF_WORK_DIR || "/tmp";
-          const unique = Date.now();
-          effectiveFileOutput = path.join(tmpDir, `openai_image_${unique}.${images[0]?.ext ?? "png"}`);
+          // Use default output directory
+          const defaultDir = await getDefaultOutputDir();
+          const baseFilename = filename ? sanitizeFilename(filename) : `openai_image_${Date.now()}`;
+          effectiveFileOutput = path.join(defaultDir, `${baseFilename}.${images[0]?.ext ?? "png"}`);
         }
       }
 
       if (effectiveOutput === "file_output") {
         const fs = await import("fs/promises");
         const path = await import("path");
+        
+        // If no file_output path was specified, use default directory
+        if (!effectiveFileOutput) {
+          const defaultDir = await getDefaultOutputDir();
+          const baseFilename = filename ? sanitizeFilename(filename) : `openai_image_${Date.now()}`;
+          effectiveFileOutput = path.join(defaultDir, `${baseFilename}.${images[0]?.ext ?? "png"}`);
+        }
+        
         // If multiple images, append index to filename
         const basePath = effectiveFileOutput!;
         const responses = [];
@@ -233,6 +285,7 @@ import path from "path";
     output: z.enum(["base64", "file_output"]).default("base64").describe("Output format: base64 or file path."),
     file_output: z.string().refine(absolutePathCheck, { message: "Path must be absolute" }).optional()
       .describe("Absolute path to save the output image file, including the desired file extension (e.g., /path/to/image.png). If n > 1, an index is appended."),
+    filename: z.string().optional().describe("Optional descriptive filename (without extension) for saving the edited image. Example: 'cat-with-hat'. The AI should provide a descriptive name based on the edit. If not provided, a timestamp will be used."),
   });
 
   // Full schema with refinement for validation inside the handler
@@ -273,6 +326,7 @@ import path from "path";
         user,
         output = "base64",
         file_output: file_outputRaw,
+        filename,
       } = validatedArgs; // <-- Use validatedArgs here
       const file_output: string | undefined = file_outputRaw;
       
@@ -353,16 +407,19 @@ import path from "path";
       if (output === "base64" && totalBase64Size > MAX_RESPONSE_SIZE) {
         effectiveOutput = "file_output";
         if (!file_output) {
-          // Use /tmp or MCP_HF_WORK_DIR if set
-          const tmpDir = process.env.MCP_HF_WORK_DIR || "/tmp";
-          const unique = Date.now();
-          effectiveFileOutput = path.join(tmpDir, `openai_image_edit_${unique}.png`);
+          // Use default output directory
+          const defaultDir = await getDefaultOutputDir();
+          const baseFilename = filename ? sanitizeFilename(filename) : `openai_image_edit_${Date.now()}`;
+          effectiveFileOutput = path.join(defaultDir, `${baseFilename}.png`);
         }
       }
 
       if (effectiveOutput === "file_output") {
+        // If no file_output path was specified, use default directory
         if (!effectiveFileOutput) {
-          throw new Error("file_output path is required when output is 'file_output'");
+          const defaultDir = await getDefaultOutputDir();
+          const baseFilename = filename ? sanitizeFilename(filename) : `openai_image_edit_${Date.now()}`;
+          effectiveFileOutput = path.join(defaultDir, `${baseFilename}.png`);
         }
         // Use fs/promises and path (already imported)
         const basePath = effectiveFileOutput!;
